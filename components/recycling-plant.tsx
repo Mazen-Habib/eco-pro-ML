@@ -119,7 +119,7 @@ export function RecyclingPlant() {
           </div>
 
           {/* Right: Recycling Bins */}
-          <div className="w-full lg:w-auto shrink-0">
+          <div className="w-full lg:w-auto shrink-0 flex justify-center">
             <RecyclingBins stats={stats} activeBin={activeBin} />
           </div>
         </div>
