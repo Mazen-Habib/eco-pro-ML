@@ -755,3 +755,30 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
 [01:49:04.923] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.0","sv":"0.1.3","ts":1765101317918}
 [01:49:14.021] Server  LOG      ✓ Compiled in 142ms
 [01:49:24.478] Server  LOG      ✓ Compiled in 113ms
+[03:32:42.017] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:32:43.240] Server  ERROR   Proxy error: TypeError: fetch failed
+[03:32:43.269] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[03:32:43.269] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[03:32:43.269] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.0","sv":"0.1.3","ts":1765114462762}
+[03:33:01.976] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:33:02.159] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[03:33:02.159] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[03:33:02.159] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.0","sv":"0.1.3","ts":1765114482049}
+[03:33:10.642] Browser LOG     Starting camera...
+[03:33:12.518] Browser LOG     Camera stream obtained: {}
+[03:33:12.619] Browser LOG     Video stream attached to element
+[03:33:50.943] Browser LOG     Starting camera...
+[03:33:50.943] Browser LOG     Camera stream obtained: {}
+[03:33:51.046] Browser LOG     Video stream attached to element
+[03:34:24.024] Browser LOG     Starting camera...
+[03:34:24.024] Browser LOG     Camera stream obtained: {}
+[03:34:24.126] Browser LOG     Video stream attached to element
+[03:34:42.389] Browser LOG     Starting camera...
+[03:34:42.389] Browser LOG     Camera stream obtained: {}
+[03:34:42.490] Browser LOG     Video stream attached to element
+[04:24:37.520] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[04:24:38.034] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[04:24:38.034] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[04:24:38.034] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.0","sv":"0.1.3","ts":1765121896311}
+[04:58:56.876] Server  LOG      ✓ Compiled in 444ms
+[04:59:31.603] Server  LOG      ✓ Compiled in 430ms

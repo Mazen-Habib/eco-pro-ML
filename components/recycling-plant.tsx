@@ -45,8 +45,17 @@ export function RecyclingPlant() {
     }, 300)
 
     setTimeout(async () => {
-      const category = await classifyTrash(imageUrl)
-      setItems((prev) => prev.map((item) => (item.id === id ? { ...item, category, status: "classified" } : item)))
+      const result = await classifyTrash(imageUrl)
+      const category = result.category
+      const foregroundImage = result.foregroundImage || imageUrl
+      
+      setItems((prev) => 
+        prev.map((item) => 
+          item.id === id 
+            ? { ...item, category, status: "classified", imageUrl: foregroundImage } 
+            : item
+        )
+      )
 
       setTimeout(() => {
         setItems((prev) => prev.map((item) => (item.id === id ? { ...item, position: 95 } : item)))

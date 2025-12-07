@@ -13,3 +13,4 @@ ultralytics>=8.0.0
 # Option 2: PyTorch only (if you have compatibility issues)
 # torch>=2.0.0
 # torchvision>=0.15.0
+rembg

@@ -31,7 +31,7 @@ export const categoryConfig: Record<
 
 const categories: TrashCategory[] = ["cardboard", "plastic", "glass"]
 
-export async function classifyTrash(imageUrl: string): Promise<TrashCategory> {
+export async function classifyTrash(imageUrl: string): Promise<{ category: TrashCategory; foregroundImage?: string }> {
   try {
     // Convert base64 data URL to File object
     const response = await fetch(imageUrl)
@@ -55,23 +55,36 @@ export async function classifyTrash(imageUrl: string): Promise<TrashCategory> {
     const data = await apiResponse.json()
     
     // Get the first prediction's class_name
+    let category: TrashCategory
     if (data.predictions && data.predictions.length > 0) {
       const className = data.predictions[0].class_name?.toLowerCase()
       
       // Map class name to our category
       if (categories.includes(className as TrashCategory)) {
-        return className as TrashCategory
+        category = className as TrashCategory
+      } else {
+        // Fallback to random if invalid category
+        console.warn("Invalid category received:", className)
+        const randomIndex = Math.floor(Math.random() * categories.length)
+        category = categories[randomIndex]
       }
+    } else {
+      // Fallback to random if no predictions
+      console.warn("No predictions received:", data)
+      const randomIndex = Math.floor(Math.random() * categories.length)
+      category = categories[randomIndex]
     }
     
-    // Fallback to random if invalid category
-    console.warn("Invalid or no category received:", data)
-    const randomIndex = Math.floor(Math.random() * categories.length)
-    return categories[randomIndex]
+    // Return category and foreground image (if available)
+    const foregroundImage = data.foreground_image 
+      ? `data:image/png;base64,${data.foreground_image}` 
+      : undefined
+    
+    return { category, foregroundImage }
   } catch (error) {
     console.error("Classification error:", error)
     // Fallback to random category on error
     const randomIndex = Math.floor(Math.random() * categories.length)
-    return categories[randomIndex]
+    return { category: categories[randomIndex] }
   }
 }
