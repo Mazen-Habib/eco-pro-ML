@@ -1394,10 +1394,6 @@
     grid-auto-rows: min-content;
   }
 
-  .grid-cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
   .grid-cols-\[0_1fr\] {
     grid-template-columns: 0 1fr;
   }
@@ -4501,12 +4497,6 @@
   @media (min-width: 64rem) {
     .lg\:w-auto {
       width: auto;
-    }
-  }
-
-  @media (min-width: 64rem) {
-    .lg\:grid-cols-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
