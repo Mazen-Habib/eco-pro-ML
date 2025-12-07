@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Image Classifier - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .upload-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #preview {
+            max-width: 100%;
+            margin: 20px 0;
+            display: none;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            display: none;
+        }
+        .prediction {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            border-radius: 3px;
+        }
+        .error {
+            color: #d32f2f;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 5px;
+        }
+        .success {
+            color: #388e3c;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 YOLO Image Classifier</h1>
+        
+        <div class="upload-section">
+            <h3>Upload an image to classify</h3>
+            <input type="file" id="imageInput" accept="image/*">
+            <br>
+            <button id="uploadBtn" onclick="classifyImage()" disabled>Classify Image</button>
+        </div>
+
+        <img id="preview" alt="Preview">
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const preview = document.getElementById('preview');
+        const results = document.getElementById('results');
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    uploadBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function classifyImage() {
+            const file = imageInput.files[0];
+            if (!file) {
+                alert('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            uploadBtn.disabled = true;
+            results.innerHTML = '<div class="loading">🔄 Classifying image...</div>';
+            results.style.display = 'block';
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/classify/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResults(data);
+                } else {
+                    displayError(data);
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="error">Error: ${error.message}<br>Make sure the server is running at http://127.0.0.1:8000/</div>`;
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            if (data.predictions && data.predictions.length > 0) {
+                let html = `<h3 class="success">✅ ${data.message}</h3>`;
+                html += `<p><strong>Objects detected: ${data.count}</strong></p>`;
+                
+                data.predictions.forEach((pred, index) => {
+                    html += `
+                        <div class="prediction">
+                            <strong>#${index + 1}</strong> 
+                            ${pred.class_name} 
+                            <span style="float: right; color: #666;">
+                                ${(pred.confidence * 100).toFixed(2)}% confidence
+                            </span>
+                        </div>
+                    `;
+                });
+                
+                results.innerHTML = html;
+            } else {
+                results.innerHTML = `<div class="error">⚠️ ${data.message || 'No objects detected'}</div>`;
+            }
+        }
+
+        function displayError(data) {
+            let errorMsg = 'An error occurred';
+            if (data.error) {
+                errorMsg = data.error;
+            } else if (data.image) {
+                errorMsg = data.image[0];
+            }
+            results.innerHTML = `<div class="error">❌ Error: ${errorMsg}</div>`;
+        }
+    </script>
+</body>
+</html>
