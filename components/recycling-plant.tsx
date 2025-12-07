@@ -6,6 +6,7 @@ import { ImageUploader } from "./image-uploader"
 import { ConveyorBelt } from "./conveyor-belt"
 import { RecyclingBins } from "./recycling-bins"
 import { TrashItem } from "./trash-item"
+import { ConnectionTestModal } from "./connection-test-modal"
 import { classifyTrash, type TrashCategory } from "@/lib/classify"
 import { Recycle, BarChart3 } from "lucide-react"
 
@@ -70,6 +71,9 @@ export function RecyclingPlant() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Connection Test Modal */}
+      <ConnectionTestModal />
+      
       {/* Header */}
       <header className="py-4 px-4 border-b border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

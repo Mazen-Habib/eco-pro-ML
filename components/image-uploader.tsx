@@ -17,8 +17,6 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  console.log("ImageUploader render - showCameraModal:", showCameraModal)
-
   const handleFile = useCallback(
     (file: File) => {
       if (!file.type.startsWith("image/")) return
@@ -131,9 +129,6 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
 
   return (
     <>
-      {/* Debug info */}
-      {showCameraModal && <div className="fixed top-0 left-0 bg-red-500 text-white p-2 z-[100]">Modal State: TRUE</div>}
-      
       <div className="flex flex-col gap-3">
         <div
           onDrop={handleDrop}
@@ -176,10 +171,7 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
         </div>
 
         <button
-          onClick={() => {
-            console.log("Use Camera button clicked")
-            startCamera()
-          }}
+          onClick={startCamera}
           className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent hover:border-primary transition-colors text-sm font-medium"
         >
           <Camera className="w-4 h-4" />
