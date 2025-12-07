@@ -3,10 +3,11 @@ Django>=4.2.0
 djangorestframework>=3.14.0
 django-cors-headers>=4.0.0
 Pillow>=10.0.0
+gunicorn>=21.2.0
 
 # YOLO Model (install one of the following):
 # Option 1: Ultralytics (recommended - easier to use)
-# ultralytics>=8.0.0
+ultralytics>=8.0.0
 
 # Option 2: PyTorch only (if you have compatibility issues)
 # torch>=2.0.0
