@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useCallback, useState, useRef } from "react"
-import { Upload, ImageIcon, Loader2, Camera } from "lucide-react"
+import { Upload, ImageIcon, Loader2, Camera, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface ImageUploaderProps {
@@ -13,7 +13,7 @@ interface ImageUploaderProps {
 export function ImageUploader({ onUpload }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [showCamera, setShowCamera] = useState(false)
+  const [showCameraModal, setShowCameraModal] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
@@ -64,12 +64,16 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
   const startCamera = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" } 
+        video: { 
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
       })
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         streamRef.current = stream
-        setShowCamera(true)
+        setShowCameraModal(true)
       }
     } catch (error) {
       console.error("Error accessing camera:", error)
@@ -82,7 +86,7 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
       streamRef.current.getTracks().forEach(track => track.stop())
       streamRef.current = null
     }
-    setShowCamera(false)
+    setShowCameraModal(false)
   }, [])
 
   const capturePhoto = useCallback(() => {
@@ -93,89 +97,134 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
       const ctx = canvas.getContext("2d")
       if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0)
-        const imageUrl = canvas.toDataURL("image/jpeg")
+        const imageUrl = canvas.toDataURL("image/jpeg", 0.9)
         onUpload(imageUrl)
         stopCamera()
       }
     }
   }, [onUpload, stopCamera])
 
-  if (showCamera) {
-    return (
-      <div className="relative border-2 border-primary rounded-xl overflow-hidden bg-black">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          className="w-full h-auto"
-        />
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3">
-          <button
-            onClick={capturePhoto}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-          >
-            Capture
-          </button>
-          <button
-            onClick={stopCamera}
-            className="px-6 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium hover:bg-secondary/90 transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="flex flex-col gap-3">
-      <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        className={cn(
-          "relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 cursor-pointer",
-          "hover:border-primary hover:bg-primary/5",
-          isDragging ? "border-primary bg-primary/10 scale-[1.02]" : "border-border bg-card",
-        )}
-      >
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleInputChange}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        />
+    <>
+      <div className="flex flex-col gap-3">
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className={cn(
+            "relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 cursor-pointer",
+            "hover:border-primary hover:bg-primary/5",
+            isDragging ? "border-primary bg-primary/10 scale-[1.02]" : "border-border bg-card",
+          )}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleInputChange}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
 
-        <div className="flex flex-col items-center gap-3">
-          <div
-            className={cn(
-              "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
-              isDragging ? "bg-primary text-primary-foreground" : "bg-muted",
-            )}
-          >
-            {isLoading ? (
-              <Loader2 className="w-6 h-6 animate-spin" />
-            ) : isDragging ? (
-              <ImageIcon className="w-6 h-6" />
-            ) : (
-              <Upload className="w-6 h-6" />
-            )}
-          </div>
+          <div className="flex flex-col items-center gap-3">
+            <div
+              className={cn(
+                "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
+                isDragging ? "bg-primary text-primary-foreground" : "bg-muted",
+              )}
+            >
+              {isLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : isDragging ? (
+                <ImageIcon className="w-6 h-6" />
+              ) : (
+                <Upload className="w-6 h-6" />
+              )}
+            </div>
 
-          <div className="text-center">
-            <p className="text-sm font-medium mb-0.5">{isDragging ? "Drop it!" : "Drag & drop"}</p>
-            <p className="text-xs text-muted-foreground">or click to browse</p>
+            <div className="text-center">
+              <p className="text-sm font-medium mb-0.5">{isDragging ? "Drop it!" : "Drag & drop"}</p>
+              <p className="text-xs text-muted-foreground">or click to browse</p>
+            </div>
           </div>
         </div>
+
+        <button
+          onClick={startCamera}
+          className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent hover:border-primary transition-colors text-sm font-medium"
+        >
+          <Camera className="w-4 h-4" />
+          Use Camera
+        </button>
       </div>
 
-      <button
-        onClick={startCamera}
-        className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent hover:border-primary transition-colors text-sm font-medium"
-      >
-        <Camera className="w-4 h-4" />
-        Use Camera
-      </button>
-    </div>
+      {/* Camera Modal */}
+      {showCameraModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-background rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Camera className="w-5 h-5" />
+                Capture Photo
+              </h3>
+              <button
+                onClick={stopCamera}
+                className="p-2 rounded-lg hover:bg-muted transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Camera Preview */}
+            <div className="relative bg-black aspect-video">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              
+              {/* Camera overlay guide */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-4 border-2 border-white/30 rounded-lg">
+                  {/* Corner markers */}
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-lg" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-lg" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-lg" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-lg" />
+                </div>
+                
+                {/* Center guide */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-1 h-12 bg-white/50 absolute left-1/2 -translate-x-1/2 -translate-y-6" />
+                  <div className="w-12 h-1 bg-white/50 absolute top-1/2 -translate-y-1/2 -translate-x-6" />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer with Controls */}
+            <div className="p-6 bg-card">
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={stopCamera}
+                  className="px-6 py-2.5 rounded-lg border border-border bg-background hover:bg-muted transition-colors font-medium text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={capturePhoto}
+                  className="px-8 py-2.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-sm shadow-lg shadow-primary/25"
+                >
+                  <Camera className="w-4 h-4 inline mr-2" />
+                  Capture
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground text-center mt-3">
+                Position the waste item within the frame guides
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
