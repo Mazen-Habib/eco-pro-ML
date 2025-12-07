@@ -65,6 +65,8 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
 
   const startCamera = useCallback(async () => {
     console.log("Starting camera...")
+    setShowCameraModal(true) // Show modal first
+    
     try {
       // Try different constraint configurations for better compatibility
       let stream
@@ -86,14 +88,19 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
       }
       
       console.log("Camera stream obtained:", stream)
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        streamRef.current = stream
-        setShowCameraModal(true)
-        console.log("Modal should be visible now")
-      }
+      streamRef.current = stream
+      
+      // Wait for video element to be ready
+      setTimeout(() => {
+        if (videoRef.current && streamRef.current) {
+          videoRef.current.srcObject = streamRef.current
+          console.log("Video stream attached to element")
+        }
+      }, 100)
+      
     } catch (error) {
       console.error("Error accessing camera:", error)
+      setShowCameraModal(false) // Close modal on error
       const errorMessage = error instanceof Error ? error.message : "Unknown error"
       alert(`Unable to access camera: ${errorMessage}\n\nPlease ensure:\n1. You're using HTTPS\n2. Camera permissions are granted\n3. No other app is using the camera`)
     }
