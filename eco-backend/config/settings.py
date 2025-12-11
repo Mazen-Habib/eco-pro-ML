@@ -111,7 +111,27 @@ REST_FRAMEWORK = {
     ],
 }
 
-YOLO_MODEL_PATH = BASE_DIR / 'yoloMODEL.pt'
+YOLO_MODELS = {
+    'yolov11m-3class': {
+        'path': BASE_DIR / 'yoloMODEL_new_medium.pt',
+        'classes': 3,
+        'name': 'YOLOv11m (3 Classes)'
+    },
+    'yolov11n-12class': {
+        'path': BASE_DIR / 'yoloMODEL_old_cls_12.pt',
+        'classes': 12,
+        'name': 'YOLOv11n (12 Classes)'
+    },
+    'yolov8n-3class': {
+        'path': BASE_DIR / 'yoloMODEL_old_cls.pt',
+        'classes': 3,
+        'name': 'YOLOv8n (3 Classes)'
+    }
+}
+
+# Default model
+DEFAULT_MODEL = 'yolov11n-12class'
+YOLO_MODEL_PATH = YOLO_MODELS[DEFAULT_MODEL]['path']
 
 # CORS settings
 # In production, set CORS_ALLOWED_ORIGINS in environment variable

@@ -6,13 +6,19 @@ import { cn } from "@/lib/utils"
 interface RecyclingBinsProps {
   stats: Record<TrashCategory, number>
   activeBin?: TrashCategory | null
+  modelClasses?: number
 }
 
-const binOrder: TrashCategory[] = ["cardboard", "plastic", "glass"]
+// Different bin configurations based on model
+const bin3Classes: TrashCategory[] = ["cardboard", "plastic", "glass"]
+const bin12Classes: TrashCategory[] = ["paper", "cardboard", "plastic", "vegetation", "biological", "metal", "clothes", "glass", "trash", "shoes", "battery"]
 
-export function RecyclingBins({ stats, activeBin }: RecyclingBinsProps) {
+export function RecyclingBins({ stats, activeBin, modelClasses = 12 }: RecyclingBinsProps) {
+  // Select bins based on number of classes
+  const binOrder = modelClasses === 3 ? bin3Classes : bin12Classes
+  
   return (
-    <div className="flex gap-4 items-end">
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3 max-w-full">
       {binOrder.map((category) => {
         const config = categoryConfig[category]
         const count = stats[category]
@@ -45,32 +51,32 @@ export function RecyclingBins({ stats, activeBin }: RecyclingBinsProps) {
                   isActive && "-rotate-45 -translate-y-3",
                 )}
                 style={{
-                  width: "76px",
-                  height: "12px",
+                  width: "56px",
+                  height: "10px",
                   backgroundColor: config.color,
-                  borderRadius: "6px 6px 0 0",
+                  borderRadius: "5px 5px 0 0",
                   marginLeft: "auto",
                   marginRight: "auto",
                 }}
               >
                 {/* Lid handle */}
                 <div
-                  className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 w-10 h-3 rounded-t-full"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1.5 w-8 h-2.5 rounded-t-full"
                   style={{
                     backgroundColor: config.color,
                     filter: "brightness(0.85)",
                   }}
                 />
                 {/* Lid shine */}
-                <div className="absolute top-1 left-3 w-8 h-1.5 rounded-full bg-white/30" />
+                <div className="absolute top-0.5 left-2 w-6 h-1 rounded-full bg-white/30" />
               </div>
 
               {/* Bin opening (dark hole visible when lid is open) */}
               <div
                 className="relative mx-auto overflow-hidden"
                 style={{
-                  width: "72px",
-                  height: "10px",
+                  width: "52px",
+                  height: "8px",
                   backgroundColor: "rgba(0,0,0,0.7)",
                   borderRadius: "2px 2px 0 0",
                 }}
@@ -80,23 +86,23 @@ export function RecyclingBins({ stats, activeBin }: RecyclingBinsProps) {
               <div
                 className="relative mx-auto overflow-hidden"
                 style={{
-                  width: "72px",
-                  height: "80px",
+                  width: "52px",
+                  height: "60px",
                   background: `linear-gradient(135deg, ${config.color} 0%, ${config.color} 100%)`,
-                  borderRadius: "0 0 8px 8px",
+                  borderRadius: "0 0 6px 6px",
                   clipPath: "polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%)",
                 }}
               >
                 {/* Bin ridges for texture */}
-                <div className="absolute inset-0 flex flex-col justify-evenly py-3 px-1">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="h-1.5 rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.1)" }} />
+                <div className="absolute inset-0 flex flex-col justify-evenly py-2 px-1">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-1 rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.1)" }} />
                   ))}
                 </div>
 
                 {/* Icon on bin */}
                 <div className="absolute inset-0 flex items-center justify-center z-10">
-                  <span className="text-3xl drop-shadow-md" role="img" aria-label={config.label}>
+                  <span className="text-2xl drop-shadow-md" role="img" aria-label={config.label}>
                     {config.icon}
                   </span>
                 </div>
@@ -107,13 +113,13 @@ export function RecyclingBins({ stats, activeBin }: RecyclingBinsProps) {
                   style={{
                     height: `${fillPercent}%`,
                     background: `linear-gradient(to top, rgba(0,0,0,0.4), rgba(0,0,0,0.15))`,
-                    borderRadius: "0 0 6px 6px",
+                    borderRadius: "0 0 4px 4px",
                   }}
                 >
                   {/* Trash pile texture */}
                   {count > 0 && (
                     <div
-                      className="absolute top-0 left-0 right-0 h-4"
+                      className="absolute top-0 left-0 right-0 h-3"
                       style={{
                         background: `radial-gradient(ellipse at 30% 0%, rgba(255,255,255,0.25) 0%, transparent 50%),
                                      radial-gradient(ellipse at 70% 0%, rgba(255,255,255,0.2) 0%, transparent 50%)`,
@@ -124,7 +130,7 @@ export function RecyclingBins({ stats, activeBin }: RecyclingBinsProps) {
 
                 {/* Side shine */}
                 <div
-                  className="absolute top-0 left-0 bottom-0 w-4"
+                  className="absolute top-0 left-0 bottom-0 w-3"
                   style={{
                     background: "linear-gradient(to right, rgba(255,255,255,0.3), transparent)",
                   }}
@@ -132,7 +138,7 @@ export function RecyclingBins({ stats, activeBin }: RecyclingBinsProps) {
 
                 {/* Right shadow */}
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-5"
+                  className="absolute top-0 right-0 bottom-0 w-4"
                   style={{
                     background: "linear-gradient(to left, rgba(0,0,0,0.2), transparent)",
                   }}
@@ -142,11 +148,11 @@ export function RecyclingBins({ stats, activeBin }: RecyclingBinsProps) {
               <div
                 className="mx-auto"
                 style={{
-                  width: "62px",
-                  height: "6px",
+                  width: "46px",
+                  height: "5px",
                   backgroundColor: config.color,
                   filter: "brightness(0.7)",
-                  borderRadius: "0 0 4px 4px",
+                  borderRadius: "0 0 3px 3px",
                 }}
               />
 
@@ -154,7 +160,7 @@ export function RecyclingBins({ stats, activeBin }: RecyclingBinsProps) {
               {count > 0 && (
                 <div
                   className={cn(
-                    "absolute -top-4 -right-2 w-7 h-7 rounded-full bg-foreground text-background text-sm font-bold flex items-center justify-center shadow-lg border-2 border-background z-20",
+                    "absolute -top-3 -right-1.5 w-6 h-6 rounded-full bg-foreground text-background text-xs font-bold flex items-center justify-center shadow-lg border-2 border-background z-20",
                     isActive && "animate-bounce",
                   )}
                 >
@@ -171,7 +177,7 @@ export function RecyclingBins({ stats, activeBin }: RecyclingBinsProps) {
               )}
             </div>
 
-            <span className="text-xs font-semibold text-center mt-1" style={{ color: config.color }}>
+            <span className="text-[10px] font-semibold text-center mt-1 max-w-[60px] break-words leading-tight" style={{ color: config.color }}>
               {config.label}
             </span>
           </div>

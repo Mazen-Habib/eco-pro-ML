@@ -1,43 +1,85 @@
+"use client"
+
+import { Suspense, useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
-export default function StatsPage() {
+interface ModelInfo {
+  key: string
+  name: string
+  classes: number
+}
+
+function StatsContent() {
+  const searchParams = useSearchParams()
+  const [models, setModels] = useState<ModelInfo[]>([])
+  const [selectedModel, setSelectedModel] = useState<string>(
+    searchParams.get("model") || "yolov11n-12class"
+  )
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"
+        const response = await fetch(`${backendUrl}/api/models/`)
+        if (response.ok) {
+          const data = await response.json()
+          setModels(data.models)
+          if (!searchParams.get("model")) {
+            setSelectedModel(data.default)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch models:", error)
+      }
+    }
+    fetchModels()
+  }, [searchParams])
+
   const stats = [
     {
       title: "Confusion Matrix",
       description: "Shows the performance of the classification model across all categories",
-      image: "/stats/confusion_matrix.png",
+      image: `/stats/${selectedModel}/confusion_matrix.png`,
     },
     {
       title: "Normalized Confusion Matrix",
       description: "Normalized view of classification performance for better comparison",
-      image: "/stats/confusion_matrix_normalized.png",
+      image: `/stats/${selectedModel}/confusion_matrix_normalized.png`,
     },
     {
       title: "Metrics Comparison",
       description: "Comparative view of precision, recall, and F1-score across categories",
-      image: "/stats/metrics_comparison.png",
+      image: `/stats/${selectedModel}/metrics_comparison.png`,
     },
     {
       title: "Precision Score",
       description: "Measures the accuracy of positive predictions for each category",
-      image: "/stats/precision_plot.png",
+      image: `/stats/${selectedModel}/precision_plot.png`,
     },
     {
       title: "Recall Score",
       description: "Measures the ability to find all positive instances",
-      image: "/stats/recall_plot.png",
+      image: `/stats/${selectedModel}/recall_plot.png`,
     },
     {
       title: "F1 Score",
       description: "Harmonic mean of precision and recall for balanced performance metric",
-      image: "/stats/f1_score_plot.png",
+      image: `/stats/${selectedModel}/f1_score_plot.png`,
     },
     {
       title: "Specificity Score",
       description: "Measures the ability to identify negative instances correctly",
-      image: "/stats/specificity_plot.png",
+      image: `/stats/${selectedModel}/specificity_plot.png`,
     },
   ]
 
@@ -55,11 +97,28 @@ export default function StatsPage() {
               Back to Home
             </Link>
           </div>
-          <div className="mt-4">
-            <h1 className="text-3xl font-bold tracking-tight">Model Performance Statistics</h1>
-            <p className="text-muted-foreground mt-2">
-              Detailed analytics and performance metrics of the waste classification model
-            </p>
+          <div className="mt-4 flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Model Performance Statistics</h1>
+              <p className="text-muted-foreground mt-2">
+                Detailed analytics and performance metrics of the waste classification model
+              </p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-muted-foreground">Select Model</label>
+              <Select value={selectedModel} onValueChange={setSelectedModel}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map((model) => (
+                    <SelectItem key={model.key} value={model.key}>
+                      {model.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </header>
@@ -128,5 +187,13 @@ export default function StatsPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function StatsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <StatsContent />
+    </Suspense>
   )
 }

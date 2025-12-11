@@ -14,17 +14,32 @@ except ImportError:
 
 
 class YOLOModel:
-    _instance = None
-    _model = None
+    _instances = {}
     
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(YOLOModel, cls).__new__(cls)
-        return cls._instance
+    def __new__(cls, model_key=None):
+        if model_key is None:
+            model_key = settings.DEFAULT_MODEL
+        
+        if model_key not in cls._instances:
+            instance = super(YOLOModel, cls).__new__(cls)
+            cls._instances[model_key] = instance
+            instance._initialized = False
+        return cls._instances[model_key]
     
-    def __init__(self):
-        if self._model is None:
-            model_path = settings.YOLO_MODEL_PATH
+    def __init__(self, model_key=None):
+        if model_key is None:
+            model_key = settings.DEFAULT_MODEL
+        
+        if not self._initialized:
+            self._initialized = True
+            self.model_key = model_key
+            
+            if model_key not in settings.YOLO_MODELS:
+                raise ValueError(f"Unknown model key: {model_key}")
+            
+            model_config = settings.YOLO_MODELS[model_key]
+            model_path = model_config['path']
+            
             if not os.path.exists(model_path):
                 raise FileNotFoundError(f"YOLO model not found at {model_path}")
             
@@ -141,5 +156,5 @@ class YOLOModel:
             raise RuntimeError(f"Error during inference: {str(e)}")
 
 
-def get_yolo_model():
-    return YOLOModel()
+def get_yolo_model(model_key=None):
+    return YOLOModel(model_key)

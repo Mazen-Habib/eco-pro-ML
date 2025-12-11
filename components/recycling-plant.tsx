@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import Link from "next/link"
 import { ImageUploader } from "./image-uploader"
 import { ConveyorBelt } from "./conveyor-belt"
@@ -8,7 +8,14 @@ import { RecyclingBins } from "./recycling-bins"
 import { TrashItem } from "./trash-item"
 import { ConnectionTestModal } from "./connection-test-modal"
 import { classifyTrash, type TrashCategory } from "@/lib/classify"
-import { Recycle, BarChart3 } from "lucide-react"
+import { Recycle, BarChart3, BookOpen } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export interface ProcessingItem {
   id: string
@@ -18,14 +25,62 @@ export interface ProcessingItem {
   position: number // 0-100 representing position on conveyor
 }
 
+interface ModelInfo {
+  key: string
+  name: string
+  classes: number
+}
+
 export function RecyclingPlant() {
   const [items, setItems] = useState<ProcessingItem[]>([])
   const [stats, setStats] = useState<Record<TrashCategory, number>>({
+    paper: 0,
     cardboard: 0,
     plastic: 0,
+    vegetation: 0,
+    biological: 0,
+    metal: 0,
+    clothes: 0,
     glass: 0,
+    trash: 0,
+    shoes: 0,
+    battery: 0,
   })
   const [activeBin, setActiveBin] = useState<TrashCategory | null>(null)
+  const [models, setModels] = useState<ModelInfo[]>([])
+  const [selectedModel, setSelectedModel] = useState<string>("yolov11n-12class")
+  const [modelClasses, setModelClasses] = useState<number>(12)
+
+  useEffect(() => {
+    // Fetch available models from backend
+    const fetchModels = async () => {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"
+        const response = await fetch(`${backendUrl}/api/models/`)
+        if (response.ok) {
+          const data = await response.json()
+          setModels(data.models)
+          setSelectedModel(data.default)
+          // Set the number of classes for the default model
+          const defaultModel = data.models.find((m: ModelInfo) => m.key === data.default)
+          if (defaultModel) {
+            setModelClasses(defaultModel.classes)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch models:", error)
+      }
+    }
+    fetchModels()
+  }, [])
+
+  // Update model classes when model changes
+  useEffect(() => {
+    const selectedModelInfo = models.find(m => m.key === selectedModel)
+    if (selectedModelInfo) {
+      setModelClasses(selectedModelInfo.classes)
+    }
+  }, [selectedModel, models])
 
   const handleImageUpload = useCallback(async (imageUrl: string) => {
     const id = Math.random().toString(36).substring(7)
@@ -45,14 +100,13 @@ export function RecyclingPlant() {
     }, 300)
 
     setTimeout(async () => {
-      const result = await classifyTrash(imageUrl)
+      const result = await classifyTrash(imageUrl, selectedModel)
       const category = result.category
-      const foregroundImage = result.foregroundImage || imageUrl
       
       setItems((prev) => 
         prev.map((item) => 
           item.id === id 
-            ? { ...item, category, status: "classified", imageUrl: foregroundImage } 
+            ? { ...item, category, status: "classified" } 
             : item
         )
       )
@@ -76,7 +130,7 @@ export function RecyclingPlant() {
         }, 1000)
       }, 800)
     }, 2300)
-  }, [])
+  }, [selectedModel])
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -95,13 +149,35 @@ export function RecyclingPlant() {
               <p className="text-xs text-muted-foreground">AI-Powered Recycling</p>
             </div>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-muted-foreground">Model</label>
+              <Select value={selectedModel} onValueChange={setSelectedModel}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map((model) => (
+                    <SelectItem key={model.key} value={model.key}>
+                      {model.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Link
-              href="/stats"
+              href="/docs"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border hover:bg-accent hover:border-primary transition-colors text-sm font-medium"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Docs</span>
+            </Link>
+            <Link
+              href={`/stats?model=${selectedModel}`}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border hover:bg-accent hover:border-primary transition-colors text-sm font-medium"
             >
               <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">Model Stats</span>
+              <span className="hidden sm:inline">Stats</span>
             </Link>
             <div className="text-right">
               <p className="text-xs text-muted-foreground">Items Sorted</p>
@@ -133,7 +209,7 @@ export function RecyclingPlant() {
 
           {/* Right: Recycling Bins */}
           <div className="w-full lg:w-auto shrink-0 flex justify-center">
-            <RecyclingBins stats={stats} activeBin={activeBin} />
+            <RecyclingBins stats={stats} activeBin={activeBin} modelClasses={modelClasses} />
           </div>
         </div>
       </main>
