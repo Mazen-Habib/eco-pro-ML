@@ -1,0 +1,31 @@
+services:
+  # Frontend - Next.js application
+  - type: web
+    name: eco-pro-frontend
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: ./build.sh
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_BACKEND_URL
+        sync: false
+    healthCheckPath: /
+
+  # Backend - Django Python API (optional - if deploying backend to Render)
+  # Uncomment if you want to deploy the backend too
+  # - type: web
+  #   name: eco-pro-backend
+  #   runtime: python
+  #   region: oregon
+  #   plan: free
+  #   buildCommand: cd eco-backend && pip install -r requirements.txt
+  #   startCommand: cd eco-backend && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+  #   envVars:
+  #     - key: PYTHON_VERSION
+  #       value: 3.14.0
+  #     - key: DEBUG
+  #       value: false
+  #   healthCheckPath: /api/classify/
